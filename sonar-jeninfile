@@ -1,0 +1,35 @@
+pipeline {
+    agent any
+    tools {
+        maven 'Maven3'
+    }
+
+    stages {
+        stage('Git checkout') {
+            steps {
+                git branch: 'main', credentialsId: 'git_arshiyamail', url: 'https://github.com/ArshiyaBegum1/MttJococo.git'
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+        stage('Test') {
+            steps {
+                // Run tests with JaCoCo coverage enabled
+                sh 'mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent test'
+            }
+        }
+        stage('SonarQube analysis') {
+            steps{
+                withSonarQubeEnv('sonarqube-9.9.5') { 
+                sh "mvn sonar:sonar"
+                }
+			}
+			
+		}
+        
+        
+    }
+}
